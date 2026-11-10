@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SaleTransaction, SaleItem, ApprovalRequest
+from .models import SaleTransaction, SaleItem, ApprovalRequest, NotebookDailySale, DailyRegisterClosing
 
 class SaleItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,5 +25,15 @@ class SaleTransactionSerializer(serializers.ModelSerializer):
 class ApprovalRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApprovalRequest
+        fields = '__all__'
+
+class NotebookDailySaleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotebookDailySale
+        fields = '__all__'
+
+class DailyRegisterClosingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyRegisterClosing
         fields = '__all__'
 

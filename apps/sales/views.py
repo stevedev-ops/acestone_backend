@@ -3,8 +3,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
 from django.utils import timezone
-from .models import SaleTransaction, SaleItem, ApprovalRequest
-from .serializers import SaleTransactionSerializer, ApprovalRequestSerializer
+from .models import SaleTransaction, SaleItem, ApprovalRequest, NotebookDailySale, DailyRegisterClosing
+from .serializers import (
+    SaleTransactionSerializer, 
+    ApprovalRequestSerializer,
+    NotebookDailySaleSerializer,
+    DailyRegisterClosingSerializer
+)
 from apps.inventory.models import JewelleryItem
 from apps.audit.models import AuditLog
 
@@ -173,4 +178,67 @@ class ApprovalRequestViewSet(viewsets.ModelViewSet):
         )
 
         return Response({'status': f"Approval request {decision.lower()}."})
+
+class NotebookDailySaleViewSet(viewsets.ModelViewSet):
+    """
+    Digitized Daily Sales Notebook API.
+    Employees enter daily counter transactions quickly.
+    Services (like ultrasonic polishing KSh 150) generate revenue with 0 inventory deduction.
+    """
+    queryset = NotebookDailySale.objects.all()
+    serializer_class = NotebookDailySaleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        rec_by = user.name if hasattr(user, 'name') and user.name else user.email
+        sale = serializer.save(recorded_by=rec_by)
+
+        AuditLog.objects.create(
+            user=user,
+            action='NOTEBOOK_SALE_LOGGED',
+            entity_type='NOTEBOOK_SALE',
+            entity_id=str(sale.id),
+            details=f"Recorded sale for {sale.item_description} (KSh {sale.amount}) via {sale.payment_method}",
+        )
+
+    @action(detail=True, methods=['post'])
+    def reconcile(self, request, pk=None):
+        if request.user.role not in ['OWNER', 'MANAGER']:
+            return Response({'error': 'Only Boss or Manager can reconcile notebook entries.'}, status=403)
+
+        sale = self.get_object()
+        product_id = request.data.get('product_id')
+        notes = request.data.get('notes', '')
+
+        sale.reconciled = True
+        if product_id:
+            sale.reconciled_with_product_id = str(product_id)
+        if notes:
+            sale.notes = f"{sale.notes} | Boss Reconciliation: {notes}".strip(' |')
+        sale.save()
+
+        AuditLog.objects.create(
+            user=request.user,
+            action='NOTEBOOK_SALE_RECONCILED',
+            entity_type='NOTEBOOK_SALE',
+            entity_id=str(sale.id),
+            details=f"Reconciled notebook entry #{sale.id}: {sale.item_description} with Product ID {product_id}",
+        )
+
+        return Response(NotebookDailySaleSerializer(sale).data)
+
+class DailyRegisterClosingViewSet(viewsets.ModelViewSet):
+    """
+    End-of-day register reconciliation API.
+    Reconciles physical cash drawer banknote counts with Safaricom M-Pesa receipts.
+    """
+    queryset = DailyRegisterClosing.objects.all()
+    serializer_class = DailyRegisterClosingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        if request.user.role not in ['OWNER', 'MANAGER']:
+            return Response({'error': 'Only Boss or Supervisor can authorize daily register closing.'}, status=403)
+        return super().create(request, *args, **kwargs)
 
