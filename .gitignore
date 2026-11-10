@@ -1,0 +1,44 @@
+# Python byte-code
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+venv/
+env/
+ENV/
+.env
+
+# Database
+*.sqlite3
+*.db
+
+# Distribution / Packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Static & Media cache
+/staticfiles/
+/media/temp/
+
+# Logs
+*.log
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
