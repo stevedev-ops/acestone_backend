@@ -22,7 +22,6 @@ class Command(BaseCommand):
             defaults={
                 'name': 'Sarah Stone',
                 'role': 'OWNER',
-                'title': 'Managing Director & Founder',
                 'phone': '+254 712 345 678',
                 'pin_code': '1234',
                 'is_staff': True,
@@ -37,7 +36,6 @@ class Command(BaseCommand):
             defaults={
                 'name': 'Grace Mwangi',
                 'role': 'MANAGER',
-                'title': 'Store Operations Supervisor',
                 'phone': '+254 720 112 233',
                 'pin_code': '5678',
                 'is_staff': True,
@@ -51,7 +49,6 @@ class Command(BaseCommand):
             defaults={
                 'name': 'David Kiprono',
                 'role': 'EMPLOYEE',
-                'title': 'Senior Jewellery Consultant',
                 'phone': '+254 722 889 900',
                 'commission_rate': 0.03,
             }
@@ -64,7 +61,6 @@ class Command(BaseCommand):
             defaults={
                 'name': 'Amina Hassan',
                 'role': 'EMPLOYEE',
-                'title': 'Sales & Client Advisor',
                 'phone': '+254 733 445 566',
                 'commission_rate': 0.03,
             }
@@ -146,7 +142,6 @@ class Command(BaseCommand):
         )
 
         # 4. Jewellery Inventory Items
-        comp_a3 = ShelfCompartment.objects.filter(code='A-03').first()
         prod1, _ = JewelleryItem.objects.get_or_create(
             code='AC-GOLD-001',
             defaults={
@@ -162,13 +157,13 @@ class Command(BaseCommand):
                 'suggested_price': 35000,
                 'min_selling_price': 29000,
                 'quantity': 1,
-                'compartment': comp_a3,
-                'supplier': sup1,
+                'showcase_id': 'Showcase A',
+                'compartment_code': 'A-03',
+                'supplier': sup1.name,
                 'status': 'Available',
             }
         )
 
-        comp_a4 = ShelfCompartment.objects.filter(code='A-04').first()
         prod2, _ = JewelleryItem.objects.get_or_create(
             code='AC-PND-001',
             defaults={
@@ -184,8 +179,9 @@ class Command(BaseCommand):
                 'suggested_price': 55000,
                 'min_selling_price': 46000,
                 'quantity': 1,
-                'compartment': comp_a4,
-                'supplier': sup2,
+                'showcase_id': 'Showcase A',
+                'compartment_code': 'A-04',
+                'supplier': sup2.name,
                 'status': 'Available',
             }
         )
@@ -227,6 +223,7 @@ class Command(BaseCommand):
             defaults={
                 'category': 'Rent',
                 'amount': 180000,
+                'date': timezone.now().date(),
                 'description': 'Monthly prime showroom retail lease at The Mall Westlands',
                 'recorded_by': 'Sarah Stone',
             }
@@ -236,6 +233,7 @@ class Command(BaseCommand):
             defaults={
                 'category': 'Security',
                 'amount': 45000,
+                'date': timezone.now().date(),
                 'description': '24/7 dedicated armed guards & direct alarm link to G4S Kenya',
                 'recorded_by': 'Grace Mwangi',
             }
@@ -251,3 +249,4 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS('🎉 Acestone Jewellery POS database seeded successfully!'))
+

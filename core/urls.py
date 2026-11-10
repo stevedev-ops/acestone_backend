@@ -1,11 +1,22 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
+def health_check(request):
+    return JsonResponse({
+        "status": "online",
+        "service": "Acestone Jewellery POS & Inventory API",
+        "version": "1.0.0",
+        "currency": "KES"
+    })
+
 urlpatterns = [
+    path('', health_check, name='api_root_health'),
+    path('health/', health_check, name='api_health'),
     path('admin/', admin.site.urls),
     
     # Auth & Tokens

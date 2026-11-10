@@ -35,6 +35,10 @@ wheels/
 /staticfiles/
 /media/temp/
 
+# Local test scripts
+test_pg.sh
+*.sh.local
+
 # Logs
 *.log
 
